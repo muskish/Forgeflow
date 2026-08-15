@@ -1,0 +1,14 @@
+version: 3
+hasura:
+  adminSecret: '{{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}'
+  jwtSecrets:
+    - type: HS256
+      key: '{{ secrets.NHOST_JWT_SECRET }}'
+auth:
+  redirections:
+    allowedUrls:
+      - http://localhost:3000
+postgres:
+  version: '14'
+functions:
+  nodeVersion: '18'
