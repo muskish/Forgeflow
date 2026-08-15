@@ -1,7 +1,25 @@
--- Enable pgcrypto for gen_random_uuid()
+-- Enable pgcrypto for gen_random_uuid() and password hashing
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Create tables if not exists
+-- Ensure auth schema exists
+CREATE SCHEMA IF NOT EXISTS auth;
+
+-- Create auth.users table if not exists (Nhost Auth schema compatibility)
+CREATE TABLE IF NOT EXISTS auth.users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    email_verified BOOLEAN NOT NULL DEFAULT true,
+    is_anonymous BOOLEAN NOT NULL DEFAULT false,
+    default_role TEXT NOT NULL DEFAULT 'user',
+    disabled BOOLEAN NOT NULL DEFAULT false,
+    display_name TEXT,
+    avatar_url TEXT
+);
+
+-- Create public tables if not exists
 CREATE TABLE IF NOT EXISTS public.organizations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
@@ -82,6 +100,15 @@ FROM public.workflows w
 LEFT JOIN public.workflow_runs r ON r.workflow_id = w.id
 GROUP BY w.org_id;
 
+-- Seed Real Auth Users (Password for all accounts: Password123!)
+INSERT INTO auth.users (id, email, password_hash, display_name, default_role)
+VALUES 
+  ('11111111-1111-1111-1111-111111111111', 'owner@orga.com', crypt('Password123!', gen_salt('bf')), 'Org A Owner', 'user'),
+  ('22222222-2222-2222-2222-222222222222', 'editor@orga.com', crypt('Password123!', gen_salt('bf')), 'Org A Editor', 'user'),
+  ('33333333-3333-3333-3333-333333333333', 'viewer@orga.com', crypt('Password123!', gen_salt('bf')), 'Org A Viewer', 'user'),
+  ('44444444-4444-4444-4444-444444444444', 'editor@orgb.com', crypt('Password123!', gen_salt('bf')), 'Org B Editor', 'user')
+ON CONFLICT (id) DO NOTHING;
+
 -- Seed Sample Organizations
 INSERT INTO public.organizations (id, name, quota_limit, quota_used)
 VALUES 
@@ -89,7 +116,7 @@ VALUES
   ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Beta Inc (Org B)', 50, 0)
 ON CONFLICT (id) DO NOTHING;
 
--- Seed Sample Org Members
+-- Seed Org Members linking Auth Users to Orgs & Roles
 INSERT INTO public.org_members (user_id, org_id, role)
 VALUES
   ('11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'owner'),

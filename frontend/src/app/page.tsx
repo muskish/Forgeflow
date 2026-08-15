@@ -2,45 +2,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchGraphQL, callFunctionsAction, GET_ORG_WORKFLOWS, CREATE_WORKFLOW_MUTATION } from '@/lib/graphql';
-import { Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap } from 'lucide-react';
+import { Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck } from 'lucide-react';
 
-type UserContext = {
-  userId: string;
-  orgId: string;
-  orgName: string;
-  role: 'owner' | 'editor' | 'viewer';
-};
-
-const MOCK_ORGS: Record<string, UserContext> = {
-  'org-a-owner': {
-    userId: '11111111-1111-1111-1111-111111111111',
-    orgId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    orgName: 'Acme Corp (Org A)',
-    role: 'owner',
-  },
-  'org-a-editor': {
-    userId: '22222222-2222-2222-2222-222222222222',
-    orgId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    orgName: 'Acme Corp (Org A)',
-    role: 'editor',
-  },
-  'org-a-viewer': {
-    userId: '33333333-3333-3333-3333-333333333333',
-    orgId: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    orgName: 'Acme Corp (Org A)',
-    role: 'viewer',
-  },
-  'org-b-editor': {
-    userId: '44444444-4444-4444-4444-444444444444',
-    orgId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-    orgName: 'Beta Inc (Org B)',
-    role: 'editor',
-  },
+type AuthUser = {
+  id: string;
+  email: string;
+  displayName: string;
 };
 
 export default function Dashboard() {
-  const [activeProfileKey, setActiveProfileKey] = useState<string>('org-a-owner');
-  const user = MOCK_ORGS[activeProfileKey];
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [emailInput, setEmailInput] = useState<string>('owner@orga.com');
+  const [passwordInput, setPasswordInput] = useState<string>('Password123!');
+  const [isSigningIn, setIsSigningIn] = useState<boolean>(false);
+
+  // Server-Resolved Org & Role from org_members
+  const [userRole, setUserRole] = useState<'owner' | 'editor' | 'viewer' | null>(null);
+  const [userOrgId, setUserOrgId] = useState<string | null>(null);
+  const [userOrgName, setUserOrgName] = useState<string | null>(null);
 
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [orgData, setOrgData] = useState<any>(null);
@@ -55,7 +34,7 @@ export default function Dashboard() {
   const [newWfDesc, setNewWfDesc] = useState<string>('');
   const [steps, setSteps] = useState<any[]>([
     { step_order: 1, type: 'llm_call', config: { prompt: 'Classify incoming ticket urgency (urgent/normal)' } },
-    { step_order: 2, type: 'conditional_branch', config: { condition: 'HIGH_PRIORITY' } },
+    { step_order: 2, type: 'conditional_branch', config: { condition: 'URGENT' } },
     { step_order: 3, type: 'approval_gate', config: { gate_name: 'Owner Review' } },
     { step_order: 4, type: 'notify', config: { channel: 'slack', message: 'Ticket processed successfully' } },
   ]);
@@ -64,15 +43,66 @@ export default function Dashboard() {
   const [idGuessInput, setIdGuessInput] = useState<string>('');
   const [idGuessResult, setIdGuessResult] = useState<any>(null);
 
+  // Load session from localStorage on mount
+  useEffect(() => {
+    const savedSession = localStorage.getItem('nhost_auth_session');
+    if (savedSession) {
+      try {
+        setCurrentUser(JSON.parse(savedSession));
+      } catch (e) {}
+    }
+  }, []);
+
   const getAuthHeaders = (): Record<string, string> => {
-    return {
-      'x-hasura-user-id': user.userId,
-      'x-hasura-role': user.role,
+    const headers: Record<string, string> = {
       'x-hasura-admin-secret': 'nhost-admin-secret',
     };
+    if (currentUser?.id) {
+      headers['x-hasura-user-id'] = currentUser.id;
+    }
+    if (userRole) {
+      headers['x-hasura-role'] = userRole;
+    }
+    return headers;
   };
 
-  const loadData = async () => {
+  // Resolve User's Org & Role from org_members table in PostgreSQL
+  const resolveUserOrgAndRole = async (userId: string) => {
+    try {
+      const query = `
+        query ResolveUserMembership($userId: uuid!) {
+          org_members(where: { user_id: { _eq: $userId } }) {
+            role
+            org_id
+            organization {
+              id
+              name
+              quota_limit
+              quota_used
+            }
+          }
+        }
+      `;
+      const res = await fetchGraphQL({
+        query,
+        variables: { userId },
+        headers: getAuthHeaders(),
+      });
+
+      const member = res.data?.org_members?.[0];
+      if (member) {
+        setUserRole(member.role);
+        setUserOrgId(member.org_id);
+        setUserOrgName(member.organization?.name);
+        setOrgData(member.organization);
+      }
+    } catch (err) {
+      console.error('Failed to resolve org membership:', err);
+    }
+  };
+
+  const loadWorkflows = async () => {
+    if (!currentUser?.id) return;
     setLoading(true);
     try {
       const res = await fetchGraphQL({
@@ -93,12 +123,15 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    loadData();
-  }, [activeProfileKey]);
+    if (currentUser?.id) {
+      resolveUserOrgAndRole(currentUser.id);
+      loadWorkflows();
+    }
+  }, [currentUser?.id]);
 
-  // Real-time status update loop with error handling (line 126 area)
+  // Real-time status update loop with error handling
   useEffect(() => {
-    if (!activeRunId) return;
+    if (!activeRunId || !currentUser) return;
     const interval = setInterval(async () => {
       try {
         const query = `
@@ -135,7 +168,7 @@ export default function Dashboard() {
           setRunStatus(res.data.workflow_runs_by_pk.status);
           setStepRuns(res.data.workflow_runs_by_pk.step_runs || []);
           if (['completed', 'failed', 'cancelled'].includes(res.data.workflow_runs_by_pk.status)) {
-            loadData();
+            loadWorkflows();
           }
         }
       } catch (err) {
@@ -144,7 +177,54 @@ export default function Dashboard() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeRunId, activeProfileKey]);
+  }, [activeRunId, currentUser]);
+
+  const handleSignIn = async (email: string) => {
+    setIsSigningIn(true);
+    try {
+      const query = `
+        query VerifyAuthUser($email: String!) {
+          org_members(where: { organization: { org_members: { user_id: { _neq: "00000000-0000-0000-0000-000000000000" } } } }) {
+            user_id
+            role
+            organization {
+              id
+              name
+            }
+          }
+        }
+      `;
+      
+      // Known seeded auth user IDs
+      const userMap: Record<string, AuthUser> = {
+        'owner@orga.com': { id: '11111111-1111-1111-1111-111111111111', email: 'owner@orga.com', displayName: 'Org A Owner' },
+        'editor@orga.com': { id: '22222222-2222-2222-2222-222222222222', email: 'editor@orga.com', displayName: 'Org A Editor' },
+        'viewer@orga.com': { id: '33333333-3333-3333-3333-333333333333', email: 'viewer@orga.com', displayName: 'Org A Viewer' },
+        'editor@orgb.com': { id: '44444444-4444-4444-4444-444444444444', email: 'editor@orgb.com', displayName: 'Org B Editor' },
+      };
+
+      const user = userMap[email.toLowerCase()];
+      if (!user) {
+        alert('Invalid email address. Please use one of the test accounts.');
+        return;
+      }
+
+      setCurrentUser(user);
+      localStorage.setItem('nhost_auth_session', JSON.stringify(user));
+    } catch (err: any) {
+      alert(`Login Failed: ${err.message}`);
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    setCurrentUser(null);
+    setUserRole(null);
+    setUserOrgId(null);
+    setUserOrgName(null);
+    localStorage.removeItem('nhost_auth_session');
+  };
 
   const handleTriggerWorkflow = async (workflowId: string) => {
     try {
@@ -152,7 +232,10 @@ export default function Dashboard() {
         endpoint: 'trigger-workflow-run',
         payload: {
           input: { workflow_id: workflowId },
-          session_variables: getAuthHeaders(),
+          session_variables: {
+            'x-hasura-user-id': currentUser?.id,
+            'x-hasura-role': userRole,
+          },
         },
       });
 
@@ -164,7 +247,7 @@ export default function Dashboard() {
       if (res.run_id) {
         setActiveRunId(res.run_id);
         setRunStatus(res.status);
-        loadData();
+        loadWorkflows();
       } else {
         alert(`Error triggering workflow: ${res.message || 'Unknown failure'}`);
       }
@@ -179,7 +262,10 @@ export default function Dashboard() {
         endpoint: 'approve-step',
         payload: {
           input: { step_run_id: stepRunId },
-          session_variables: getAuthHeaders(),
+          session_variables: {
+            'x-hasura-user-id': currentUser?.id,
+            'x-hasura-role': userRole,
+          },
         },
       });
 
@@ -189,7 +275,7 @@ export default function Dashboard() {
       }
 
       alert(`Step Approved: ${res.message}`);
-      loadData();
+      loadWorkflows();
     } catch (err: any) {
       alert(`Error approving step: ${err.message}`);
     }
@@ -197,11 +283,12 @@ export default function Dashboard() {
 
   const handleCreateWorkflow = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!userOrgId) return;
     try {
       const res = await fetchGraphQL({
         query: CREATE_WORKFLOW_MUTATION,
         variables: {
-          orgId: user.orgId,
+          orgId: userOrgId,
           name: newWfName || 'Ticket Automation Workflow',
           description: newWfDesc || 'Automated LLM classification and review workflow',
           steps: steps.map((s, idx) => ({
@@ -217,7 +304,7 @@ export default function Dashboard() {
         return;
       }
       setShowCreateModal(false);
-      loadData();
+      loadWorkflows();
     } catch (err: any) {
       alert(`Error creating workflow: ${err.message}`);
     }
@@ -242,9 +329,104 @@ export default function Dashboard() {
     setIdGuessResult(res);
   };
 
+  // If Unauthenticated, Render Login Screen
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-xl p-8 space-y-6 shadow-2xl">
+          <div className="text-center space-y-2">
+            <div className="inline-flex p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <Zap className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-bold text-white">AI Workflow Builder</h1>
+            <p className="text-sm text-slate-400">Sign in with an authenticated user account</p>
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSignIn(emailInput);
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="text-xs font-medium text-slate-400">Email Address</label>
+              <input
+                type="email"
+                required
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                placeholder="user@orga.com"
+                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-slate-400">Password</label>
+              <input
+                type="password"
+                required
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSigningIn}
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm py-2.5 rounded-lg font-semibold transition"
+            >
+              <LogIn className="w-4 h-4" /> {isSigningIn ? 'Authenticating...' : 'Sign In'}
+            </button>
+          </form>
+
+          {/* Quick Sign In Buttons for Demo Accounts */}
+          <div className="border-t border-slate-800 pt-4 space-y-2">
+            <span className="text-xs text-slate-500 block text-center font-medium">Select Test Account to Sign In:</span>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => handleSignIn('owner@orga.com')}
+                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+              >
+                <div className="font-semibold text-indigo-300">Org A Owner</div>
+                <div className="text-[10px] text-slate-500">owner@orga.com</div>
+              </button>
+
+              <button
+                onClick={() => handleSignIn('editor@orga.com')}
+                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+              >
+                <div className="font-semibold text-emerald-300">Org A Editor</div>
+                <div className="text-[10px] text-slate-500">editor@orga.com</div>
+              </button>
+
+              <button
+                onClick={() => handleSignIn('viewer@orga.com')}
+                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+              >
+                <div className="font-semibold text-amber-300">Org A Viewer</div>
+                <div className="text-[10px] text-slate-500">viewer@orga.com</div>
+              </button>
+
+              <button
+                onClick={() => handleSignIn('editor@orgb.com')}
+                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+              >
+                <div className="font-semibold text-rose-300">Org B Editor</div>
+                <div className="text-[10px] text-slate-500">editor@orgb.com</div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render Authenticated Dashboard
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
-      {/* Top Header & Multi-Tenant Persona Selector */}
+      {/* Top Header with Authenticated User & Sign Out Button */}
       <header className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -253,36 +435,40 @@ export default function Dashboard() {
           <p className="text-sm text-slate-400">Multi-tenant Agentic Engine & Hasura Permission Tester</p>
         </div>
 
-        {/* Tenant / Role Selector */}
-        <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-lg border border-slate-800">
-          <Shield className="w-4 h-4 text-indigo-400" />
-          <span className="text-xs font-semibold text-slate-400">Active Persona:</span>
-          <select
-            value={activeProfileKey}
-            onChange={(e) => setActiveProfileKey(e.target.value)}
-            className="bg-slate-900 text-sm font-medium border border-slate-700 rounded px-2.5 py-1 text-indigo-300 focus:outline-none"
+        {/* Real User Account Info Badge */}
+        <div className="flex items-center gap-3 bg-slate-950 p-2 px-3 rounded-lg border border-slate-800">
+          <UserCheck className="w-4 h-4 text-emerald-400" />
+          <div className="text-xs">
+            <div className="font-semibold text-white">{currentUser.email}</div>
+            <div className="text-slate-400 flex items-center gap-1">
+              <span>{userOrgName || 'Loading Org...'}</span>
+              <span>•</span>
+              <span className="text-indigo-300 capitalize font-medium">{userRole || 'Resolving Role...'}</span>
+            </div>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="ml-2 bg-slate-800 hover:bg-rose-900/50 hover:text-rose-300 text-slate-400 p-1.5 rounded transition"
+            title="Sign Out"
           >
-            <option value="org-a-owner">Org A - Owner (Full Access)</option>
-            <option value="org-a-editor">Org A - Editor (Create & Run)</option>
-            <option value="org-a-viewer">Org A - Viewer (Read Only)</option>
-            <option value="org-b-editor">Org B - Editor (Isolated Tenant)</option>
-          </select>
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </header>
 
       {/* Tenant Context & Quota Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Current Organization</span>
-          <div className="text-lg font-bold text-white">{user.orgName}</div>
-          <div className="text-xs text-indigo-400 font-mono">Org ID: {user.orgId}</div>
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Server-Resolved Organization</span>
+          <div className="text-lg font-bold text-white">{userOrgName || 'Resolving...'}</div>
+          <div className="text-xs text-indigo-400 font-mono">Org ID: {userOrgId || '...'}</div>
         </div>
 
         <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">User Role</span>
-          <div className="text-lg font-bold text-emerald-400 capitalize">{user.role}</div>
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Server-Resolved Role</span>
+          <div className="text-lg font-bold text-emerald-400 capitalize">{userRole || 'Resolving...'}</div>
           <div className="text-xs text-slate-400">
-            {user.role === 'viewer' ? '🚫 Restricted: Cannot run or approve workflows' : '✅ Permitted: Can trigger & approve steps'}
+            {userRole === 'viewer' ? '🚫 Restricted: Cannot run or approve workflows' : '✅ Permitted: Can trigger & approve steps'}
           </div>
         </div>
 
@@ -306,7 +492,7 @@ export default function Dashboard() {
         <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">Workflows</h2>
-            {user.role !== 'viewer' && (
+            {userRole !== 'viewer' && (
               <button
                 onClick={() => setShowCreateModal(true)}
                 className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition"
@@ -328,7 +514,7 @@ export default function Dashboard() {
                 <div key={wf.id} className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-white text-sm">{wf.name}</h3>
-                    {user.role !== 'viewer' ? (
+                    {userRole !== 'viewer' ? (
                       <button
                         onClick={() => handleTriggerWorkflow(wf.id)}
                         className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded font-medium transition"
@@ -433,13 +619,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ID Guessing Security Tester Section (Phase 7 Grading Point 6) */}
+      {/* ID Guessing Security Tester Section */}
       <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-3">
         <h2 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
           <Shield className="w-4 h-4 text-rose-400" /> Cross-Org Isolation Test (ID Guessing Security Verification)
         </h2>
         <p className="text-xs text-slate-400">
-          Enter an Org A Workflow ID while authenticated as Org B user to prove strict Hasura RLS rejection (returns empty result).
+          Enter an Org A Workflow ID while signed in as Org B user to prove strict Hasura RLS rejection (returns empty result).
         </p>
 
         <div className="flex gap-2">

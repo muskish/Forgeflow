@@ -1,10 +1,9 @@
+'use client';
+
 import './globals.css';
 import React from 'react';
-
-export const metadata = {
-  title: 'AI Agent Workflow Builder',
-  description: 'Multi-tenant AI Workflow Automation Platform with Nhost & Hasura',
-};
+import { NhostProvider } from '@nhost/nextjs';
+import { nhost } from '@/lib/nhost';
 
 export default function RootLayout({
   children,
@@ -14,7 +13,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-background text-gray-100 min-h-screen antialiased">
-        {children}
+        <NhostProvider nhost={nhost}>
+          {children}
+        </NhostProvider>
       </body>
     </html>
   );
