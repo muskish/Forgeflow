@@ -158,30 +158,18 @@ query { step_runs(where: {workflow_run_id: {_eq: "92026205-44cf-4b42-8ca8-19932f
 ### Status: Fully Verified with Empirical Test Evidence
 
 #### Test 1: Unauthorized Webhook Trigger Request (Invalid Shared Secret)
-*Webhook Request:*
-```bash
-curl -X POST "http://localhost:3001/webhook-trigger?workflow_id=c2222222-2222-2222-2222-222222222222" \
-  -H "Content-Type: application/json" \
-  -H "x-webhook-secret: invalid-secret-key"
-```
-*Result:*
-```json
-{"message":"Unauthorized webhook trigger request"}
-```
-*Verification:* Unauthorized HTTP request rejected with `401 Unauthorized`.
+*Result:* `{"message":"Unauthorized webhook trigger request"}` (401 Unauthorized rejection)
 
 #### Test 2: Authorized Webhook Trigger Request (Valid Shared Secret Starts Run)
-*Webhook Request:*
-```bash
-curl -X POST "http://localhost:3001/webhook-trigger?workflow_id=c2222222-2222-2222-2222-222222222222" \
-  -H "Content-Type: application/json" \
-  -H "x-webhook-secret: nhost-webhook-secret-key-12345"
-```
-*Result:*
-```json
-{"run_id":"a93effeb-d1a0-427f-a8af-4343e047778f","status":"paused"}
-```
-*Verification:* External HTTP Webhook request starts workflow run without a manual button click.
+*Result:* `{"run_id":"a93effeb-d1a0-427f-a8af-4343e047778f","status":"paused"}`
 
 ---
-**Phase 5 Definition of Done is fully met and verified.**
+
+## Phase 6 & Phase 7 — Frontend & Final Scenario Verification
+### Status: Fully Verified in Browser UI (`http://localhost:3000`)
+
+- [x] **Multi-Tenant Persona Switching**: Tested switching between Org A Owner, Editor, Viewer, and Org B Editor personas.
+- [x] **Live Step Status Stream**: Interactive step run monitor streams step progress live without full page refresh.
+- [x] **Approval Gate UI**: Step approval interface allows permitted roles (Owner/Editor) to approve and resume execution, while restricting Viewers.
+- [x] **Quota Indicator**: Real-time quota usage counter updates upon workflow execution.
+- [x] **Cross-Org Security Tester**: Verified raw ID-guessing query rejection for Org B users.
