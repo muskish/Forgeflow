@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchGraphQL, callFunctionsAction, GET_ORG_WORKFLOWS, CREATE_WORKFLOW_MUTATION } from '@/lib/graphql';
-import { Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck } from 'lucide-react';
+import { Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck, Trash2 } from 'lucide-react';
 
 type AuthUser = {
   id: string;
@@ -28,16 +28,13 @@ export default function Dashboard() {
   const [stepRuns, setStepRuns] = useState<any[]>([]);
   const [runStatus, setRunStatus] = useState<string | null>(null);
 
-  // New Workflow Modal state
+  // New Workflow Modal state with dynamic customizable steps
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [newWfName, setNewWfName] = useState<string>('');
   const [newWfDesc, setNewWfDesc] = useState<string>('');
-  const [steps, setSteps] = useState<any[]>([
-    { step_order: 1, type: 'llm_call', config: { prompt: 'Classify incoming ticket urgency (urgent/normal)' } },
-    { step_order: 2, type: 'conditional_branch', config: { condition: 'URGENT' } },
-    { step_order: 3, type: 'approval_gate', config: { gate_name: 'Owner Review' } },
-    { step_order: 4, type: 'notify', config: { channel: 'slack', message: 'Ticket processed successfully' } },
-  ]);
+  const [customPrompt, setCustomPrompt] = useState<string>('Classify customer message: URGENT server crash ticket requiring immediate fix');
+  const [customCondition, setCustomCondition] = useState<string>('URGENT');
+  const [customGateName, setCustomGateName] = useState<string>('Executive Review');
 
   // ID Guessing Test state
   const [idGuessInput, setIdGuessInput] = useState<string>('');
@@ -182,20 +179,6 @@ export default function Dashboard() {
   const handleSignIn = async (email: string) => {
     setIsSigningIn(true);
     try {
-      const query = `
-        query VerifyAuthUser($email: String!) {
-          org_members(where: { organization: { org_members: { user_id: { _neq: "00000000-0000-0000-0000-000000000000" } } } }) {
-            user_id
-            role
-            organization {
-              id
-              name
-            }
-          }
-        }
-      `;
-      
-      // Known seeded auth user IDs
       const userMap: Record<string, AuthUser> = {
         'owner@orga.com': { id: '11111111-1111-1111-1111-111111111111', email: 'owner@orga.com', displayName: 'Org A Owner' },
         'editor@orga.com': { id: '22222222-2222-2222-2222-222222222222', email: 'editor@orga.com', displayName: 'Org A Editor' },
@@ -285,17 +268,20 @@ export default function Dashboard() {
     e.preventDefault();
     if (!userOrgId) return;
     try {
+      const dynamicSteps = [
+        { step_order: 1, type: 'llm_call', config: { prompt: customPrompt } },
+        { step_order: 2, type: 'conditional_branch', config: { condition: customCondition } },
+        { step_order: 3, type: 'approval_gate', config: { gate_name: customGateName } },
+        { step_order: 4, type: 'notify', config: { channel: 'slack', message: 'Workflow step process completed' } },
+      ];
+
       const res = await fetchGraphQL({
         query: CREATE_WORKFLOW_MUTATION,
         variables: {
           orgId: userOrgId,
-          name: newWfName || 'Ticket Automation Workflow',
-          description: newWfDesc || 'Automated LLM classification and review workflow',
-          steps: steps.map((s, idx) => ({
-            step_order: idx + 1,
-            type: s.type,
-            config: s.config,
-          })),
+          name: newWfName || 'Custom AI Workflow',
+          description: newWfDesc || 'Customized multi-step execution pipeline',
+          steps: dynamicSteps,
         },
         headers: getAuthHeaders(),
       });
@@ -651,11 +637,11 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Create Workflow Modal */}
+      {/* Create Custom Workflow Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-lg w-full space-y-4 shadow-2xl">
-            <h2 className="text-lg font-bold text-white">Create New Workflow</h2>
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-lg w-full space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 className="text-lg font-bold text-white">Create Custom Workflow</h2>
             <form onSubmit={handleCreateWorkflow} className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-slate-400">Workflow Name</label>
@@ -677,6 +663,53 @@ export default function Dashboard() {
                   onChange={(e) => setNewWfDesc(e.target.value)}
                   placeholder="AI evaluation with approval gate"
                   className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none"
+                />
+              </div>
+
+              {/* Step 1 Configuration: LLM Prompt */}
+              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
+                <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+                  <span>Step 1: LLM Call</span>
+                  <span className="text-[10px] text-slate-500 font-mono">type: llm_call</span>
+                </div>
+                <label className="text-[11px] text-slate-400 block">LLM Input Prompt</label>
+                <textarea
+                  rows={2}
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white focus:outline-none font-mono"
+                />
+              </div>
+
+              {/* Step 2 Configuration: Conditional Branch */}
+              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
+                <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+                  <span>Step 2: Conditional Branch</span>
+                  <span className="text-[10px] text-slate-500 font-mono">type: conditional_branch</span>
+                </div>
+                <label className="text-[11px] text-slate-400 block">Branch Target Condition</label>
+                <input
+                  type="text"
+                  value={customCondition}
+                  onChange={(e) => setCustomCondition(e.target.value)}
+                  placeholder="URGENT"
+                  className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none font-mono"
+                />
+              </div>
+
+              {/* Step 3 Configuration: Approval Gate */}
+              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
+                <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+                  <span>Step 3: Approval Gate</span>
+                  <span className="text-[10px] text-slate-500 font-mono">type: approval_gate</span>
+                </div>
+                <label className="text-[11px] text-slate-400 block">Gate Signoff Title</label>
+                <input
+                  type="text"
+                  value={customGateName}
+                  onChange={(e) => setCustomGateName(e.target.value)}
+                  placeholder="Executive Review"
+                  className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none"
                 />
               </div>
 
