@@ -1,4 +1,3 @@
-version: 2
 subdomain: local
 region: local
 auth:
@@ -9,8 +8,8 @@ postgres:
   version: "14"
 hasura:
   adminSecret: nhost-admin-secret
-  jwtSecret:
-    type: HS256
-    key: nhost-jwt-secret-key-must-be-at-least-32-chars-long
+  jwtSecrets:
+    - type: HS256
+      key: nhost-jwt-secret-key-must-be-at-least-32-chars-long
 functions:
   nodeVersion: "18"
