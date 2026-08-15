@@ -1,0 +1,43 @@
+actions:
+  - name: triggerWorkflowRun
+    definition:
+      kind: synchronous
+      handler: '{{NHOST_FUNCTIONS_URL}}/trigger-workflow-run'
+      forward_client_headers: true
+      headers:
+        - name: nhost-webhook-secret
+          value_from_env: NHOST_WEBHOOK_SECRET
+    permissions:
+      - role: owner
+      - role: editor
+  - name: approveStep
+    definition:
+      kind: synchronous
+      handler: '{{NHOST_FUNCTIONS_URL}}/approve-step'
+      forward_client_headers: true
+      headers:
+        - name: nhost-webhook-secret
+          value_from_env: NHOST_WEBHOOK_SECRET
+    permissions:
+      - role: owner
+      - role: editor
+      - role: viewer
+custom_types:
+  enums: []
+  input_objects: []
+  objects:
+    - name: TriggerWorkflowRunOutput
+      fields:
+        - name: run_id
+          type: String!
+        - name: status
+          type: String!
+    - name: ApproveStepOutput
+      fields:
+        - name: success
+          type: Boolean!
+        - name: message
+          type: String!
+        - name: status
+          type: String!
+  scalars: []

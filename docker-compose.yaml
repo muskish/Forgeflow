@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    container_name: vocallabs_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./scripts/seed_db.sql:/docker-entrypoint-initdb.d/seed_db.sql
+
+  graphql-engine:
+    image: hasura/graphql-engine:v2.36.0
+    container_name: vocallabs_hasura
+    restart: always
+    ports:
+      - "1337:8080"
+    depends_on:
+      - postgres
+    environment:
+      HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, execution-log
+      HASURA_GRAPHQL_ADMIN_SECRET: nhost-admin-secret
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256","key":"nhost-jwt-secret-key-must-be-at-least-32-chars-long"}'
+      NHOST_FUNCTIONS_URL: http://host.docker.internal:3001
+
+volumes:
+  db_data:

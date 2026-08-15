@@ -1,0 +1,13 @@
+{
+  "name": "ai-agent-workflow-builder-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "nhost": "nhost",
+    "nhost:up": "nhost up",
+    "nhost:down": "nhost down"
+  },
+  "devDependencies": {
+    "@nhost/cli": "latest"
+  }
+}
