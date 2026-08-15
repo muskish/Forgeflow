@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchGraphQL, callFunctionsAction, GET_ORG_WORKFLOWS, CREATE_WORKFLOW_MUTATION } from '@/lib/graphql';
-import { 
-  Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck, 
+import {
+  Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck,
   Layers, Cpu, Sparkles, ShieldAlert, Hexagon
 } from 'lucide-react';
 
@@ -49,7 +49,7 @@ export default function Dashboard() {
     if (savedSession) {
       try {
         setCurrentUser(JSON.parse(savedSession));
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -158,7 +158,7 @@ export default function Dashboard() {
           }
         `;
         const res = await fetchGraphQL({ query, variables: { runId: activeRunId }, headers: getAuthHeaders() });
-        
+
         if (res.errors) {
           console.warn('Subscription/Query error:', res.errors[0]?.message);
           return;
@@ -522,7 +522,7 @@ export default function Dashboard() {
                   onClick={() => setShowCreateModal(true)}
                   className="flex items-center gap-1.5 bg-[#d4fc30] hover:bg-[#c0eb00] text-[#171717] text-xs px-4 py-2 rounded-full font-black shadow-xs transition"
                 >
-                  <Plus className="w-4 h-4" /> + New Task
+                  <Plus className="w-4 h-4" /> New Task
                 </button>
               )}
             </div>
@@ -579,13 +579,12 @@ export default function Dashboard() {
               </div>
               {runStatus && (
                 <span
-                  className={`text-xs px-4 py-1.5 rounded-full font-black uppercase tracking-wider ${
-                    runStatus === 'completed'
+                  className={`text-xs px-4 py-1.5 rounded-full font-black uppercase tracking-wider ${runStatus === 'completed'
                       ? 'bg-emerald-200 text-emerald-950 border border-emerald-400'
                       : runStatus === 'paused'
-                      ? 'bg-[#d4fc30] text-[#171717] border border-slate-900'
-                      : 'bg-slate-300 text-slate-900 border border-slate-400'
-                  }`}
+                        ? 'bg-[#d4fc30] text-[#171717] border border-slate-900'
+                        : 'bg-slate-300 text-slate-900 border border-slate-400'
+                    }`}
                 >
                   Status: {runStatus}
                 </span>
@@ -611,13 +610,12 @@ export default function Dashboard() {
                       </div>
 
                       <span
-                        className={`text-xs px-3.5 py-1 rounded-full font-black ${
-                          sr.status === 'completed'
+                        className={`text-xs px-3.5 py-1 rounded-full font-black ${sr.status === 'completed'
                             ? 'bg-emerald-200 text-emerald-950 border border-emerald-300'
                             : sr.status === 'paused'
-                            ? 'bg-[#d4fc30] text-[#171717] border border-slate-900'
-                            : 'bg-slate-300 text-slate-800'
-                        }`}
+                              ? 'bg-[#d4fc30] text-[#171717] border border-slate-900'
+                              : 'bg-slate-300 text-slate-800'
+                          }`}
                       >
                         {sr.status}
                       </span>
