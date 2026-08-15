@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { fetchGraphQL, callFunctionsAction, GET_ORG_WORKFLOWS, CREATE_WORKFLOW_MUTATION } from '@/lib/graphql';
-import { Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck, Trash2 } from 'lucide-react';
+import { 
+  Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck, 
+  Layers, Cpu, Sparkles, ShieldAlert
+} from 'lucide-react';
 
 type AuthUser = {
   id: string;
@@ -28,11 +31,11 @@ export default function Dashboard() {
   const [stepRuns, setStepRuns] = useState<any[]>([]);
   const [runStatus, setRunStatus] = useState<string | null>(null);
 
-  // New Workflow Modal state with dynamic customizable steps
+  // New Workflow Modal state
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [newWfName, setNewWfName] = useState<string>('');
   const [newWfDesc, setNewWfDesc] = useState<string>('');
-  const [customPrompt, setCustomPrompt] = useState<string>('Classify customer message: URGENT server crash ticket requiring immediate fix');
+  const [customPrompt, setCustomPrompt] = useState<string>('Analyze customer inquiry: URGENT ticket requiring immediate fix');
   const [customCondition, setCustomCondition] = useState<string>('URGENT');
   const [customGateName, setCustomGateName] = useState<string>('Executive Review');
 
@@ -272,14 +275,14 @@ export default function Dashboard() {
         { step_order: 1, type: 'llm_call', config: { prompt: customPrompt } },
         { step_order: 2, type: 'conditional_branch', config: { condition: customCondition } },
         { step_order: 3, type: 'approval_gate', config: { gate_name: customGateName } },
-        { step_order: 4, type: 'notify', config: { channel: 'slack', message: 'Workflow step process completed' } },
+        { step_order: 4, type: 'notify', config: { channel: 'slack', message: 'Workflow process complete' } },
       ];
 
       const res = await fetchGraphQL({
         query: CREATE_WORKFLOW_MUTATION,
         variables: {
           orgId: userOrgId,
-          name: newWfName || 'Custom AI Workflow',
+          name: newWfName || 'Custom Agent Workflow',
           description: newWfDesc || 'Customized multi-step execution pipeline',
           steps: dynamicSteps,
         },
@@ -315,17 +318,19 @@ export default function Dashboard() {
     setIdGuessResult(res);
   };
 
-  // If Unauthenticated, Render Login Screen
+  // If Unauthenticated, Render Sleek Modern Light Login Screen
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-xl p-8 space-y-6 shadow-2xl">
-          <div className="text-center space-y-2">
-            <div className="inline-flex p-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-              <Zap className="w-8 h-8" />
+      <div className="min-h-screen bg-[#f4f4f6] text-slate-900 flex items-center justify-center p-6 font-sans">
+        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 space-y-6 shadow-xl">
+          <div className="text-center space-y-3">
+            <div className="inline-flex p-4 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100 shadow-sm">
+              <Sparkles className="w-8 h-8" />
             </div>
-            <h1 className="text-2xl font-bold text-white">AI Workflow Builder</h1>
-            <p className="text-sm text-slate-400">Sign in with an authenticated user account</p>
+            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+              Forgeflow <span className="bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">AI Engine</span>
+            </h1>
+            <p className="text-sm text-slate-500 font-medium">Sign in with an authenticated user account</p>
           </div>
 
           <form
@@ -336,71 +341,71 @@ export default function Dashboard() {
             className="space-y-4"
           >
             <div>
-              <label className="text-xs font-medium text-slate-400">Email Address</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block mb-1">Email Address</label>
               <input
                 type="email"
                 required
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 placeholder="user@orga.com"
-                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white transition"
               />
             </div>
 
             <div>
-              <label className="text-xs font-medium text-slate-400">Password</label>
+              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block mb-1">Password</label>
               <input
                 type="password"
                 required
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white transition"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSigningIn}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm py-2.5 rounded-lg font-semibold transition"
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-sm py-3 rounded-xl font-semibold shadow-md transition transform active:scale-98"
             >
               <LogIn className="w-4 h-4" /> {isSigningIn ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
 
           {/* Quick Sign In Buttons for Demo Accounts */}
-          <div className="border-t border-slate-800 pt-4 space-y-2">
-            <span className="text-xs text-slate-500 block text-center font-medium">Select Test Account to Sign In:</span>
-            <div className="grid grid-cols-2 gap-2">
+          <div className="border-t border-slate-100 pt-5 space-y-3">
+            <span className="text-xs text-slate-400 block text-center font-semibold uppercase tracking-wider">Select Test Account to Sign In:</span>
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => handleSignIn('owner@orga.com')}
-                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+                className="text-xs p-3 bg-purple-50/50 hover:bg-purple-100/60 border border-purple-100 rounded-xl text-left transition"
               >
-                <div className="font-semibold text-indigo-300">Org A Owner</div>
-                <div className="text-[10px] text-slate-500">owner@orga.com</div>
+                <div className="font-bold text-purple-700">Org A Owner</div>
+                <div className="text-[11px] text-slate-500">owner@orga.com</div>
               </button>
 
               <button
                 onClick={() => handleSignIn('editor@orga.com')}
-                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+                className="text-xs p-3 bg-emerald-50/50 hover:bg-emerald-100/60 border border-emerald-100 rounded-xl text-left transition"
               >
-                <div className="font-semibold text-emerald-300">Org A Editor</div>
-                <div className="text-[10px] text-slate-500">editor@orga.com</div>
+                <div className="font-bold text-emerald-700">Org A Editor</div>
+                <div className="text-[11px] text-slate-500">editor@orga.com</div>
               </button>
 
               <button
                 onClick={() => handleSignIn('viewer@orga.com')}
-                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+                className="text-xs p-3 bg-amber-50/50 hover:bg-amber-100/60 border border-amber-100 rounded-xl text-left transition"
               >
-                <div className="font-semibold text-amber-300">Org A Viewer</div>
-                <div className="text-[10px] text-slate-500">viewer@orga.com</div>
+                <div className="font-bold text-amber-700">Org A Viewer</div>
+                <div className="text-[11px] text-slate-500">viewer@orga.com</div>
               </button>
 
               <button
                 onClick={() => handleSignIn('editor@orgb.com')}
-                className="text-xs p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded text-left"
+                className="text-xs p-3 bg-rose-50/50 hover:bg-rose-100/60 border border-rose-100 rounded-xl text-left transition"
               >
-                <div className="font-semibold text-rose-300">Org B Editor</div>
-                <div className="text-[10px] text-slate-500">editor@orgb.com</div>
+                <div className="font-bold text-rose-700">Org B Editor</div>
+                <div className="text-[11px] text-slate-500">editor@orgb.com</div>
               </button>
             </div>
           </div>
@@ -409,321 +414,363 @@ export default function Dashboard() {
     );
   }
 
-  // Render Authenticated Dashboard
+  // Render Dashboard with Functional Left Sidebar
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 space-y-6">
-      {/* Top Header with Authenticated User & Sign Out Button */}
-      <header className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-slate-900 border border-slate-800 rounded-xl gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Zap className="w-6 h-6 text-indigo-400" /> AI Workflow Builder
-          </h1>
-          <p className="text-sm text-slate-400">Multi-tenant Agentic Engine & Hasura Permission Tester</p>
+    <div className="min-h-screen bg-[#f4f4f6] text-slate-900 flex font-sans">
+      {/* Functional Sidebar matching reference design */}
+      <aside className="w-16 bg-white border-r border-slate-200/80 flex flex-col items-center justify-between py-5 shrink-0 shadow-sm">
+        <div className="flex flex-col items-center gap-6">
+          {/* Logo / Refresh Button */}
+          <button
+            onClick={() => loadWorkflows()}
+            className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-600 text-white flex items-center justify-center shadow-md hover:opacity-90 transition"
+            title="Refresh Data"
+          >
+            <Sparkles className="w-5 h-5" />
+          </button>
+
+          <nav className="flex flex-col items-center gap-3">
+            {/* New Workflow Action */}
+            {userRole !== 'viewer' && (
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center transition shadow-xs"
+                title="Create New Workflow"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            )}
+
+            {/* Workflows Navigation */}
+            <button
+              onClick={() => loadWorkflows()}
+              className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-purple-50 hover:text-purple-600 text-slate-600 flex items-center justify-center transition"
+              title="Workflows Overview"
+            >
+              <Layers className="w-5 h-5" />
+            </button>
+          </nav>
         </div>
 
-        {/* Real User Account Info Badge */}
-        <div className="flex items-center gap-3 bg-slate-950 p-2 px-3 rounded-lg border border-slate-800">
-          <UserCheck className="w-4 h-4 text-emerald-400" />
-          <div className="text-xs">
-            <div className="font-semibold text-white">{currentUser.email}</div>
-            <div className="text-slate-400 flex items-center gap-1">
-              <span>{userOrgName || 'Loading Org...'}</span>
-              <span>•</span>
-              <span className="text-indigo-300 capitalize font-medium">{userRole || 'Resolving Role...'}</span>
-            </div>
-          </div>
+        {/* User Profile / Sign Out Action */}
+        <div className="flex flex-col items-center gap-3">
           <button
             onClick={handleSignOut}
-            className="ml-2 bg-slate-800 hover:bg-rose-900/50 hover:text-rose-300 text-slate-400 p-1.5 rounded transition"
+            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 flex items-center justify-center transition"
             title="Sign Out"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
-      </header>
+      </aside>
 
-      {/* Tenant Context & Quota Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Server-Resolved Organization</span>
-          <div className="text-lg font-bold text-white">{userOrgName || 'Resolving...'}</div>
-          <div className="text-xs text-indigo-400 font-mono">Org ID: {userOrgId || '...'}</div>
+      {/* Main Workspace View */}
+      <main className="flex-1 p-8 space-y-8 max-w-7xl mx-auto overflow-y-auto">
+        {/* Reference-Inspired Hero Header */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+            Hi there,{' '}
+            <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
+              {currentUser.displayName}
+            </span>
+          </h1>
+          <p className="text-slate-500 font-medium text-base">
+            What workflow would you like to execute in <span className="font-semibold text-slate-800">{userOrgName || 'Loading...'}</span> today?
+          </p>
         </div>
 
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Server-Resolved Role</span>
-          <div className="text-lg font-bold text-emerald-400 capitalize">{userRole || 'Resolving...'}</div>
-          <div className="text-xs text-slate-400">
-            {userRole === 'viewer' ? '🚫 Restricted: Cannot run or approve workflows' : '✅ Permitted: Can trigger & approve steps'}
+        {/* User Context & Quota Metric Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl space-y-1.5 shadow-xs hover:border-purple-200 transition">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Server Organization</span>
+            <div className="text-xl font-bold text-slate-900">{userOrgName || 'Resolving...'}</div>
+            <div className="text-xs text-purple-600 font-mono">Org ID: {userOrgId || '...'}</div>
+          </div>
+
+          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl space-y-1.5 shadow-xs hover:border-purple-200 transition">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Database Role</span>
+            <div className="text-xl font-bold text-emerald-600 capitalize">{userRole || 'Resolving...'}</div>
+            <div className="text-xs text-slate-500">
+              {userRole === 'viewer' ? '🚫 Restricted: Cannot run or approve workflows' : '✅ Permitted: Can trigger & approve steps'}
+            </div>
+          </div>
+
+          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl space-y-1.5 shadow-xs hover:border-purple-200 transition">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quota Usage</span>
+            <div className="text-xl font-bold text-slate-900">
+              {orgData ? `${orgData.quota_used} / ${orgData.quota_limit} Runs` : '0 / 100 Runs'}
+            </div>
+            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-1">
+              <div
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 h-full rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(100, ((orgData?.quota_used || 0) / (orgData?.quota_limit || 100)) * 100)}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-2">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Org Quota Usage</span>
-          <div className="text-lg font-bold text-white">
-            {orgData ? `${orgData.quota_used} / ${orgData.quota_limit} Runs` : '0 / 100 Runs'}
-          </div>
-          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-            <div
-              className="bg-indigo-500 h-full"
-              style={{ width: `${Math.min(100, ((orgData?.quota_used || 0) / (orgData?.quota_limit || 100)) * 100)}%` }}
-            />
-          </div>
-        </div>
-      </div>
+        {/* Main Workspace Split Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Workflows List */}
+          <div className="lg:col-span-1 bg-white border border-slate-200/80 rounded-3xl p-6 space-y-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-600" /> Workflows
+              </h2>
+              {userRole !== 'viewer' && (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs px-3.5 py-2 rounded-xl font-semibold shadow-xs transition"
+                >
+                  <Plus className="w-4 h-4" /> New
+                </button>
+              )}
+            </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Workflows List */}
-        <div className="lg:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Workflows</h2>
-            {userRole !== 'viewer' && (
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition"
-              >
-                <Plus className="w-4 h-4" /> New
-              </button>
+            {loading ? (
+              <div className="text-sm text-slate-400 py-6 text-center">Loading workflows...</div>
+            ) : workflows.length === 0 ? (
+              <div className="text-sm text-slate-400 py-10 text-center border-2 border-dashed border-slate-200 rounded-2xl">
+                No workflows found in this organization.
+              </div>
+            ) : (
+              <div className="space-y-3.5">
+                {workflows.map((wf) => (
+                  <div
+                    key={wf.id}
+                    className="p-4 bg-slate-50/70 hover:bg-purple-50/30 border border-slate-200/70 hover:border-purple-300 rounded-2xl space-y-2.5 transition group"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-slate-900 text-sm group-hover:text-purple-700 transition">{wf.name}</h3>
+                      {userRole !== 'viewer' ? (
+                        <button
+                          onClick={() => handleTriggerWorkflow(wf.id)}
+                          className="flex items-center gap-1.5 bg-slate-900 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-xl font-semibold transition shadow-xs"
+                        >
+                          <Play className="w-3 h-3 fill-current" /> Run
+                        </button>
+                      ) : (
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> Viewer
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed">{wf.description || 'No description'}</p>
+                    <div className="text-[11px] text-slate-400 font-mono">ID: {wf.id}</div>
+                    <div className="text-xs text-slate-500 font-medium flex items-center gap-2 pt-1">
+                      <span>Steps: {wf.workflow_steps?.length || 0}</span>
+                      <span>•</span>
+                      <span>Status: {wf.workflow_runs?.[0]?.status || 'Never Run'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
-          {loading ? (
-            <div className="text-sm text-slate-400 py-4 text-center">Loading workflows...</div>
-          ) : workflows.length === 0 ? (
-            <div className="text-sm text-slate-500 py-8 text-center border border-dashed border-slate-800 rounded-lg">
-              No workflows found in this organization.
+          {/* Live Execution Monitor */}
+          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-3xl p-6 space-y-5 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Cpu className="w-5 h-5 text-indigo-600" /> Live Execution Monitor
+                </h2>
+                {activeRunId && <div className="text-xs text-slate-400 font-mono mt-0.5">Run ID: {activeRunId}</div>}
+              </div>
+              {runStatus && (
+                <span
+                  className={`text-xs px-3.5 py-1 rounded-full font-bold uppercase ${
+                    runStatus === 'completed'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : runStatus === 'paused'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : 'bg-purple-50 text-purple-700 border border-purple-200'
+                  }`}
+                >
+                  Status: {runStatus}
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="space-y-3">
-              {workflows.map((wf) => (
-                <div key={wf.id} className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-white text-sm">{wf.name}</h3>
-                    {userRole !== 'viewer' ? (
-                      <button
-                        onClick={() => handleTriggerWorkflow(wf.id)}
-                        className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded font-medium transition"
+
+            {!activeRunId ? (
+              <div className="py-20 text-center text-slate-400 text-sm font-medium">
+                Select or trigger a workflow to view step-by-step real-time execution.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {stepRuns.map((sr) => (
+                  <div key={sr.id} className="p-5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-xl bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center">
+                          {sr.workflow_step?.step_order || 1}
+                        </span>
+                        <span className="font-bold text-sm uppercase tracking-wide text-slate-800">
+                          {sr.workflow_step?.type}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full font-bold ${
+                          sr.status === 'completed'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : sr.status === 'paused'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                            : 'bg-purple-50 text-purple-700 border border-purple-200'
+                        }`}
                       >
-                        <Play className="w-3 h-3 fill-current" /> Run
-                      </button>
-                    ) : (
-                      <span className="text-xs text-slate-500 flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Viewer
+                        {sr.status}
                       </span>
+                    </div>
+
+                    {sr.output && (
+                      <pre className="p-4 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 overflow-x-auto shadow-2xs">
+                        {JSON.stringify(sr.output, null, 2)}
+                      </pre>
+                    )}
+
+                    {/* Pause / Approval Gate UI */}
+                    {sr.status === 'paused' && (
+                      <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                        <div className="text-xs text-amber-800 font-semibold flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                          <span>Workflow execution paused awaiting approval.</span>
+                        </div>
+                        <button
+                          onClick={() => handleApproveStep(sr.id)}
+                          className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs transition"
+                        >
+                          Approve & Resume Step
+                        </button>
+                      </div>
                     )}
                   </div>
-                  <p className="text-xs text-slate-400">{wf.description || 'No description'}</p>
-                  <div className="text-[11px] text-slate-500 font-mono">ID: {wf.id}</div>
-                  <div className="text-xs text-slate-400 flex items-center gap-2">
-                    <span>Steps: {wf.workflow_steps?.length || 0}</span>
-                    <span>•</span>
-                    <span>Last Status: {wf.workflow_runs?.[0]?.status || 'Never Run'}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Live Step Runs Monitor */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h2 className="text-lg font-semibold text-white">Live Execution Monitor</h2>
-              {activeRunId && <div className="text-xs text-slate-400 font-mono">Run ID: {activeRunId}</div>}
-            </div>
-            {runStatus && (
-              <span
-                className={`text-xs px-3 py-1 rounded-full font-bold uppercase ${
-                  runStatus === 'completed'
-                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
-                    : runStatus === 'paused'
-                    ? 'bg-amber-500/10 border border-amber-500/30 text-amber-400'
-                    : 'bg-indigo-500/10 border border-indigo-500/30 text-indigo-400'
-                }`}
-              >
-                Status: {runStatus}
-              </span>
+                ))}
+              </div>
             )}
           </div>
+        </div>
 
-          {!activeRunId ? (
-            <div className="py-16 text-center text-slate-500 text-sm">
-              Select or trigger a workflow to view step-by-step real-time execution.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {stepRuns.map((sr) => (
-                <div key={sr.id} className="p-4 bg-slate-950 border border-slate-800 rounded-lg space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-slate-800 text-xs font-bold flex items-center justify-center text-indigo-300">
-                        {sr.workflow_step?.step_order || 1}
-                      </span>
-                      <span className="font-semibold text-sm uppercase text-slate-200">{sr.workflow_step?.type}</span>
-                    </div>
+        {/* Cross-Org Isolation Security Tester */}
+        <div className="p-6 bg-white border border-slate-200/80 rounded-3xl space-y-4 shadow-xs">
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-rose-500" /> Cross-Org Isolation Test (ID Guessing Security Verification)
+          </h2>
+          <p className="text-xs text-slate-500 font-medium">
+            Enter an Org A Workflow ID while signed in as Org B user to prove strict Hasura RLS rejection (returns empty result).
+          </p>
 
-                    <span
-                      className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
-                        sr.status === 'completed'
-                          ? 'bg-emerald-500/10 text-emerald-400'
-                          : sr.status === 'paused'
-                          ? 'bg-amber-500/10 text-amber-400'
-                          : 'bg-indigo-500/10 text-indigo-400'
-                      }`}
-                    >
-                      {sr.status}
-                    </span>
-                  </div>
+          <div className="flex gap-3">
+            <input
+              type="text"
+              placeholder="Enter target Workflow ID (e.g. Org A workflow UUID)"
+              value={idGuessInput}
+              onChange={(e) => setIdGuessInput(e.target.value)}
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white transition"
+            />
+            <button
+              onClick={handleTestIdGuessing}
+              className="bg-slate-900 hover:bg-purple-600 text-white text-xs px-5 py-2.5 rounded-xl font-semibold shadow-xs transition"
+            >
+              Execute Raw Query
+            </button>
+          </div>
 
-                  {sr.output && (
-                    <pre className="p-3 bg-slate-900 border border-slate-800 rounded text-xs font-mono text-emerald-300 overflow-x-auto">
-                      {JSON.stringify(sr.output, null, 2)}
-                    </pre>
-                  )}
-
-                  {/* Pause / Approval Gate UI */}
-                  {sr.status === 'paused' && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-center justify-between">
-                      <div className="text-xs text-amber-300 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Workflow execution paused awaiting approval.</span>
-                      </div>
-                      <button
-                        onClick={() => handleApproveStep(sr.id)}
-                        className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded transition"
-                      >
-                        Approve & Resume Step
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          {idGuessResult && (
+            <pre className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 overflow-x-auto">
+              {JSON.stringify(idGuessResult, null, 2)}
+            </pre>
           )}
         </div>
-      </div>
-
-      {/* ID Guessing Security Tester Section */}
-      <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl space-y-3">
-        <h2 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-rose-400" /> Cross-Org Isolation Test (ID Guessing Security Verification)
-        </h2>
-        <p className="text-xs text-slate-400">
-          Enter an Org A Workflow ID while signed in as Org B user to prove strict Hasura RLS rejection (returns empty result).
-        </p>
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter target Workflow ID (e.g. Org A workflow UUID)"
-            value={idGuessInput}
-            onChange={(e) => setIdGuessInput(e.target.value)}
-            className="flex-1 bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none"
-          />
-          <button
-            onClick={handleTestIdGuessing}
-            className="bg-slate-800 hover:bg-slate-700 text-white text-xs px-4 py-1.5 rounded font-medium"
-          >
-            Execute Raw Query
-          </button>
-        </div>
-
-        {idGuessResult && (
-          <pre className="p-3 bg-slate-950 border border-slate-800 rounded text-xs font-mono text-slate-300">
-            {JSON.stringify(idGuessResult, null, 2)}
-          </pre>
-        )}
-      </div>
+      </main>
 
       {/* Create Custom Workflow Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 max-w-lg w-full space-y-4 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-lg font-bold text-white">Create Custom Workflow</h2>
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-lg w-full space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 className="text-xl font-extrabold text-slate-900">Create Custom Workflow</h2>
             <form onSubmit={handleCreateWorkflow} className="space-y-4">
               <div>
-                <label className="text-xs font-medium text-slate-400">Workflow Name</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Workflow Name</label>
                 <input
                   type="text"
                   required
                   value={newWfName}
                   onChange={(e) => setNewWfName(e.target.value)}
-                  placeholder="Ticket Processing Workflow"
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none"
+                  placeholder="Financial Refund Escalation"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-slate-400">Description</label>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Description</label>
                 <input
                   type="text"
                   value={newWfDesc}
                   onChange={(e) => setNewWfDesc(e.target.value)}
-                  placeholder="AI evaluation with approval gate"
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded px-3 py-2 text-sm text-white focus:outline-none"
+                  placeholder="AI refund evaluation with VP signoff"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-500"
                 />
               </div>
 
               {/* Step 1 Configuration: LLM Prompt */}
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-                <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div className="text-xs font-bold text-purple-700 flex items-center justify-between">
                   <span>Step 1: LLM Call</span>
-                  <span className="text-[10px] text-slate-500 font-mono">type: llm_call</span>
+                  <span className="text-[10px] text-slate-400 font-mono">type: llm_call</span>
                 </div>
-                <label className="text-[11px] text-slate-400 block">LLM Input Prompt</label>
+                <label className="text-[11px] font-semibold text-slate-500 block">LLM Input Prompt</label>
                 <textarea
                   rows={2}
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-800 rounded p-2 text-xs text-white focus:outline-none font-mono"
+                  className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none font-mono"
                 />
               </div>
 
               {/* Step 2 Configuration: Conditional Branch */}
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-                <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div className="text-xs font-bold text-purple-700 flex items-center justify-between">
                   <span>Step 2: Conditional Branch</span>
-                  <span className="text-[10px] text-slate-500 font-mono">type: conditional_branch</span>
+                  <span className="text-[10px] text-slate-400 font-mono">type: conditional_branch</span>
                 </div>
-                <label className="text-[11px] text-slate-400 block">Branch Target Condition</label>
+                <label className="text-[11px] font-semibold text-slate-500 block">Branch Target Condition</label>
                 <input
                   type="text"
                   value={customCondition}
                   onChange={(e) => setCustomCondition(e.target.value)}
                   placeholder="URGENT"
-                  className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none font-mono"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none font-mono"
                 />
               </div>
 
               {/* Step 3 Configuration: Approval Gate */}
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-lg space-y-2">
-                <div className="text-xs font-semibold text-indigo-400 flex items-center justify-between">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+                <div className="text-xs font-bold text-purple-700 flex items-center justify-between">
                   <span>Step 3: Approval Gate</span>
-                  <span className="text-[10px] text-slate-500 font-mono">type: approval_gate</span>
+                  <span className="text-[10px] text-slate-400 font-mono">type: approval_gate</span>
                 </div>
-                <label className="text-[11px] text-slate-400 block">Gate Signoff Title</label>
+                <label className="text-[11px] font-semibold text-slate-500 block">Gate Signoff Title</label>
                 <input
                   type="text"
                   value={customGateName}
                   onChange={(e) => setCustomGateName(e.target.value)}
-                  placeholder="Executive Review"
-                  className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-white focus:outline-none"
+                  placeholder="Finance VP Signoff"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2.5 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2 rounded font-medium"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2.5 rounded-xl font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded font-medium"
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs px-5 py-2.5 rounded-xl font-semibold shadow-xs"
                 >
                   Save & Deploy Workflow
                 </button>
