@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchGraphQL, callFunctionsAction, GET_ORG_WORKFLOWS, CREATE_WORKFLOW_MUTATION } from '@/lib/graphql';
 import { 
   Play, Plus, RefreshCw, CheckCircle, Clock, AlertTriangle, Shield, Check, Lock, ChevronRight, Zap, LogOut, LogIn, UserCheck, 
-  Layers, Cpu, Sparkles, ShieldAlert
+  Layers, Cpu, Sparkles, ShieldAlert, Hexagon
 } from 'lucide-react';
 
 type AuthUser = {
@@ -318,19 +318,19 @@ export default function Dashboard() {
     setIdGuessResult(res);
   };
 
-  // If Unauthenticated, Render Sleek Modern Light Login Screen
+  // Unauthenticated Login Screen in Matte Gray & Electric Lime (#d4fc30)
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-[#f4f4f6] text-slate-900 flex items-center justify-center p-6 font-sans">
-        <div className="max-w-md w-full bg-white border border-slate-200 rounded-3xl p-8 space-y-6 shadow-xl">
+      <div className="min-h-screen bg-[#d6d6d8] text-[#171717] flex items-center justify-center p-6 font-sans">
+        <div className="max-w-md w-full bg-[#eaeaea] border border-slate-300/80 rounded-3xl p-8 space-y-6 shadow-lg">
           <div className="text-center space-y-3">
-            <div className="inline-flex p-4 rounded-2xl bg-purple-50 text-purple-600 border border-purple-100 shadow-sm">
-              <Sparkles className="w-8 h-8" />
+            <div className="inline-flex p-4 rounded-2xl bg-[#d4fc30] text-[#171717] shadow-sm">
+              <Hexagon className="w-8 h-8 fill-current" />
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-              Forgeflow <span className="bg-gradient-to-r from-purple-600 to-fuchsia-600 bg-clip-text text-transparent">AI Engine</span>
+            <h1 className="text-3xl font-black tracking-tight text-[#171717]">
+              Forgeflow <span className="bg-[#d4fc30] text-[#171717] px-2 py-0.5 rounded-lg inline-block">AI Engine</span>
             </h1>
-            <p className="text-sm text-slate-500 font-medium">Sign in with an authenticated user account</p>
+            <p className="text-sm text-slate-600 font-medium">Sign in with an authenticated user account</p>
           </div>
 
           <form
@@ -341,71 +341,71 @@ export default function Dashboard() {
             className="space-y-4"
           >
             <div>
-              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block mb-1">Email Address</label>
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Email Address</label>
               <input
                 type="email"
                 required
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 placeholder="user@orga.com"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white transition"
+                className="w-full bg-[#f4f4f5] border border-slate-300 rounded-2xl px-4 py-3 text-sm text-[#171717] focus:outline-none focus:border-slate-900 transition font-medium"
               />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-600 uppercase tracking-wider block mb-1">Password</label>
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1">Password</label>
               <input
                 type="password"
                 required
                 value={passwordInput}
                 onChange={(e) => setPasswordInput(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white transition"
+                className="w-full bg-[#f4f4f5] border border-slate-300 rounded-2xl px-4 py-3 text-sm text-[#171717] focus:outline-none focus:border-slate-900 transition font-medium"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSigningIn}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-sm py-3 rounded-xl font-semibold shadow-md transition transform active:scale-98"
+              className="w-full flex items-center justify-center gap-2 bg-[#d4fc30] hover:bg-[#c0eb00] text-[#171717] text-sm py-3.5 rounded-full font-black shadow-sm transition active:scale-98"
             >
               <LogIn className="w-4 h-4" /> {isSigningIn ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
 
-          {/* Quick Sign In Buttons for Demo Accounts */}
-          <div className="border-t border-slate-100 pt-5 space-y-3">
-            <span className="text-xs text-slate-400 block text-center font-semibold uppercase tracking-wider">Select Test Account to Sign In:</span>
+          {/* Quick Sign In Buttons in Hexabot Matte Capsules */}
+          <div className="border-t border-slate-300/60 pt-5 space-y-3">
+            <span className="text-xs text-slate-600 block text-center font-bold uppercase tracking-wider">Select Test Account to Sign In:</span>
             <div className="grid grid-cols-2 gap-2.5">
               <button
                 onClick={() => handleSignIn('owner@orga.com')}
-                className="text-xs p-3 bg-purple-50/50 hover:bg-purple-100/60 border border-purple-100 rounded-xl text-left transition"
+                className="text-xs p-3 bg-[#f4f4f5] hover:bg-[#d4fc30] border border-slate-300 rounded-2xl text-left transition group"
               >
-                <div className="font-bold text-purple-700">Org A Owner</div>
-                <div className="text-[11px] text-slate-500">owner@orga.com</div>
+                <div className="font-extrabold text-[#171717]">Org A Owner</div>
+                <div className="text-[11px] text-slate-500 font-medium">owner@orga.com</div>
               </button>
 
               <button
                 onClick={() => handleSignIn('editor@orga.com')}
-                className="text-xs p-3 bg-emerald-50/50 hover:bg-emerald-100/60 border border-emerald-100 rounded-xl text-left transition"
+                className="text-xs p-3 bg-[#f4f4f5] hover:bg-[#d4fc30] border border-slate-300 rounded-2xl text-left transition group"
               >
-                <div className="font-bold text-emerald-700">Org A Editor</div>
-                <div className="text-[11px] text-slate-500">editor@orga.com</div>
+                <div className="font-extrabold text-[#171717]">Org A Editor</div>
+                <div className="text-[11px] text-slate-500 font-medium">editor@orga.com</div>
               </button>
 
               <button
                 onClick={() => handleSignIn('viewer@orga.com')}
-                className="text-xs p-3 bg-amber-50/50 hover:bg-amber-100/60 border border-amber-100 rounded-xl text-left transition"
+                className="text-xs p-3 bg-[#f4f4f5] hover:bg-[#d4fc30] border border-slate-300 rounded-2xl text-left transition group"
               >
-                <div className="font-bold text-amber-700">Org A Viewer</div>
-                <div className="text-[11px] text-slate-500">viewer@orga.com</div>
+                <div className="font-extrabold text-[#171717]">Org A Viewer</div>
+                <div className="text-[11px] text-slate-500 font-medium">viewer@orga.com</div>
               </button>
 
               <button
                 onClick={() => handleSignIn('editor@orgb.com')}
-                className="text-xs p-3 bg-rose-50/50 hover:bg-rose-100/60 border border-rose-100 rounded-xl text-left transition"
+                className="text-xs p-3 bg-[#f4f4f5] hover:bg-[#d4fc30] border border-slate-300 rounded-2xl text-left transition group"
               >
-                <div className="font-bold text-rose-700">Org B Editor</div>
-                <div className="text-[11px] text-slate-500">editor@orgb.com</div>
+                <div className="font-extrabold text-[#171717]">Org B Editor</div>
+                <div className="text-[11px] text-slate-500 font-medium">editor@orgb.com</div>
               </button>
             </div>
           </div>
@@ -414,19 +414,19 @@ export default function Dashboard() {
     );
   }
 
-  // Render Dashboard with Functional Left Sidebar
+  // Render Dashboard in Hexabot Matte Gray & Electric Lime Palette
   return (
-    <div className="min-h-screen bg-[#f4f4f6] text-slate-900 flex font-sans">
-      {/* Functional Sidebar matching reference design */}
-      <aside className="w-16 bg-white border-r border-slate-200/80 flex flex-col items-center justify-between py-5 shrink-0 shadow-sm">
+    <div className="min-h-screen bg-[#d6d6d8] text-[#171717] flex font-sans">
+      {/* Sidebar matching Hexabot Matte Black & Lime Aesthetics */}
+      <aside className="w-16 bg-[#171717] flex flex-col items-center justify-between py-6 shrink-0 shadow-lg">
         <div className="flex flex-col items-center gap-6">
-          {/* Logo / Refresh Button */}
+          {/* Hexabot Logo Icon */}
           <button
             onClick={() => loadWorkflows()}
-            className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-600 text-white flex items-center justify-center shadow-md hover:opacity-90 transition"
+            className="w-10 h-10 rounded-2xl bg-[#d4fc30] text-[#171717] flex items-center justify-center font-black shadow-md hover:bg-[#c0eb00] transition"
             title="Refresh Data"
           >
-            <Sparkles className="w-5 h-5" />
+            <Hexagon className="w-5 h-5 fill-current" />
           </button>
 
           <nav className="flex flex-col items-center gap-3">
@@ -434,7 +434,7 @@ export default function Dashboard() {
             {userRole !== 'viewer' && (
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 flex items-center justify-center transition shadow-xs"
+                className="w-10 h-10 rounded-2xl bg-[#262626] text-[#d4fc30] hover:bg-[#d4fc30] hover:text-[#171717] flex items-center justify-center transition"
                 title="Create New Workflow"
               >
                 <Plus className="w-5 h-5" />
@@ -444,7 +444,7 @@ export default function Dashboard() {
             {/* Workflows Navigation */}
             <button
               onClick={() => loadWorkflows()}
-              className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-purple-50 hover:text-purple-600 text-slate-600 flex items-center justify-center transition"
+              className="w-10 h-10 rounded-2xl bg-[#262626] text-slate-300 hover:text-white flex items-center justify-center transition"
               title="Workflows Overview"
             >
               <Layers className="w-5 h-5" />
@@ -456,7 +456,7 @@ export default function Dashboard() {
         <div className="flex flex-col items-center gap-3">
           <button
             onClick={handleSignOut}
-            className="w-10 h-10 rounded-full bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 flex items-center justify-center transition"
+            className="w-10 h-10 rounded-full bg-[#262626] hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition"
             title="Sign Out"
           >
             <LogOut className="w-4 h-4" />
@@ -466,43 +466,43 @@ export default function Dashboard() {
 
       {/* Main Workspace View */}
       <main className="flex-1 p-8 space-y-8 max-w-7xl mx-auto overflow-y-auto">
-        {/* Reference-Inspired Hero Header */}
-        <div className="space-y-2">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-            Hi there,{' '}
-            <span className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 bg-clip-text text-transparent">
+        {/* Hexabot Hero Headline */}
+        <div className="space-y-3">
+          <h1 className="text-4xl font-black tracking-tight text-[#171717]">
+            How can I help you today,{' '}
+            <span className="bg-[#d4fc30] text-[#171717] px-3.5 py-0.5 rounded-full inline-block font-black border border-slate-900/10">
               {currentUser.displayName}
             </span>
           </h1>
-          <p className="text-slate-500 font-medium text-base">
-            What workflow would you like to execute in <span className="font-semibold text-slate-800">{userOrgName || 'Loading...'}</span> today?
+          <p className="text-slate-600 font-semibold text-base">
+            Select or run a workflow in <span className="font-extrabold text-[#171717]">{userOrgName || 'Loading...'}</span>
           </p>
         </div>
 
-        {/* User Context & Quota Metric Cards */}
+        {/* User Context & Quota Metric Cards (Hexabot Pill Styling) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl space-y-1.5 shadow-xs hover:border-purple-200 transition">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Server Organization</span>
-            <div className="text-xl font-bold text-slate-900">{userOrgName || 'Resolving...'}</div>
-            <div className="text-xs text-purple-600 font-mono">Org ID: {userOrgId || '...'}</div>
+          <div className="p-5 bg-[#eaeaea] border border-slate-300/80 rounded-3xl space-y-1.5 shadow-xs">
+            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Organization</span>
+            <div className="text-xl font-black text-[#171717]">{userOrgName || 'Resolving...'}</div>
+            <div className="text-xs text-slate-600 font-mono font-bold">Org ID: {userOrgId || '...'}</div>
           </div>
 
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl space-y-1.5 shadow-xs hover:border-purple-200 transition">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Database Role</span>
-            <div className="text-xl font-bold text-emerald-600 capitalize">{userRole || 'Resolving...'}</div>
-            <div className="text-xs text-slate-500">
+          <div className="p-5 bg-[#eaeaea] border border-slate-300/80 rounded-3xl space-y-1.5 shadow-xs">
+            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Database Role</span>
+            <div className="text-xl font-black text-[#171717] capitalize">{userRole || 'Resolving...'}</div>
+            <div className="text-xs text-slate-600 font-medium">
               {userRole === 'viewer' ? '🚫 Restricted: Cannot run or approve workflows' : '✅ Permitted: Can trigger & approve steps'}
             </div>
           </div>
 
-          <div className="p-5 bg-white border border-slate-200/80 rounded-2xl space-y-1.5 shadow-xs hover:border-purple-200 transition">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quota Usage</span>
-            <div className="text-xl font-bold text-slate-900">
+          <div className="p-5 bg-[#eaeaea] border border-slate-300/80 rounded-3xl space-y-1.5 shadow-xs">
+            <span className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Quota Usage</span>
+            <div className="text-xl font-black text-[#171717]">
               {orgData ? `${orgData.quota_used} / ${orgData.quota_limit} Runs` : '0 / 100 Runs'}
             </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden mt-1">
+            <div className="w-full bg-slate-300 h-3 rounded-full overflow-hidden mt-1 p-0.5">
               <div
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 h-full rounded-full transition-all duration-500"
+                className="bg-[#d4fc30] h-full rounded-full transition-all duration-500 border border-slate-800"
                 style={{ width: `${Math.min(100, ((orgData?.quota_used || 0) / (orgData?.quota_limit || 100)) * 100)}%` }}
               />
             </div>
@@ -512,25 +512,25 @@ export default function Dashboard() {
         {/* Main Workspace Split Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Workflows List */}
-          <div className="lg:col-span-1 bg-white border border-slate-200/80 rounded-3xl p-6 space-y-5 shadow-xs">
+          <div className="lg:col-span-1 bg-[#eaeaea] border border-slate-300/80 rounded-3xl p-6 space-y-5 shadow-xs">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Layers className="w-5 h-5 text-purple-600" /> Workflows
+              <h2 className="text-lg font-black text-[#171717] flex items-center gap-2">
+                <Layers className="w-5 h-5 text-[#171717]" /> Workflows
               </h2>
               {userRole !== 'viewer' && (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs px-3.5 py-2 rounded-xl font-semibold shadow-xs transition"
+                  className="flex items-center gap-1.5 bg-[#d4fc30] hover:bg-[#c0eb00] text-[#171717] text-xs px-4 py-2 rounded-full font-black shadow-xs transition"
                 >
-                  <Plus className="w-4 h-4" /> New
+                  <Plus className="w-4 h-4" /> + New Task
                 </button>
               )}
             </div>
 
             {loading ? (
-              <div className="text-sm text-slate-400 py-6 text-center">Loading workflows...</div>
+              <div className="text-sm text-slate-500 py-6 text-center font-bold">Loading workflows...</div>
             ) : workflows.length === 0 ? (
-              <div className="text-sm text-slate-400 py-10 text-center border-2 border-dashed border-slate-200 rounded-2xl">
+              <div className="text-sm text-slate-500 py-10 text-center border-2 border-dashed border-slate-300 rounded-3xl font-bold">
                 No workflows found in this organization.
               </div>
             ) : (
@@ -538,26 +538,26 @@ export default function Dashboard() {
                 {workflows.map((wf) => (
                   <div
                     key={wf.id}
-                    className="p-4 bg-slate-50/70 hover:bg-purple-50/30 border border-slate-200/70 hover:border-purple-300 rounded-2xl space-y-2.5 transition group"
+                    className="p-4 bg-[#f4f4f5] hover:bg-[#ffffff] border border-slate-300/80 rounded-2xl space-y-2.5 transition group"
                   >
                     <div className="flex items-center justify-between">
-                      <h3 className="font-bold text-slate-900 text-sm group-hover:text-purple-700 transition">{wf.name}</h3>
+                      <h3 className="font-extrabold text-[#171717] text-sm">{wf.name}</h3>
                       {userRole !== 'viewer' ? (
                         <button
                           onClick={() => handleTriggerWorkflow(wf.id)}
-                          className="flex items-center gap-1.5 bg-slate-900 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-xl font-semibold transition shadow-xs"
+                          className="flex items-center gap-1.5 bg-[#171717] hover:bg-[#d4fc30] hover:text-[#171717] text-white text-xs px-3.5 py-1.5 rounded-full font-black transition shadow-xs"
                         >
                           <Play className="w-3 h-3 fill-current" /> Run
                         </button>
                       ) : (
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <span className="text-xs text-slate-400 flex items-center gap-1 font-bold">
                           <Lock className="w-3 h-3" /> Viewer
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed">{wf.description || 'No description'}</p>
-                    <div className="text-[11px] text-slate-400 font-mono">ID: {wf.id}</div>
-                    <div className="text-xs text-slate-500 font-medium flex items-center gap-2 pt-1">
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed">{wf.description || 'No description'}</p>
+                    <div className="text-[11px] text-slate-500 font-mono font-bold">ID: {wf.id}</div>
+                    <div className="text-xs text-slate-600 font-bold flex items-center gap-2 pt-1">
                       <span>Steps: {wf.workflow_steps?.length || 0}</span>
                       <span>•</span>
                       <span>Status: {wf.workflow_runs?.[0]?.status || 'Never Run'}</span>
@@ -569,22 +569,22 @@ export default function Dashboard() {
           </div>
 
           {/* Live Execution Monitor */}
-          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-3xl p-6 space-y-5 shadow-xs">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="lg:col-span-2 bg-[#eaeaea] border border-slate-300/80 rounded-3xl p-6 space-y-5 shadow-xs">
+            <div className="flex items-center justify-between border-b border-slate-300/80 pb-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-indigo-600" /> Live Execution Monitor
+                <h2 className="text-lg font-black text-[#171717] flex items-center gap-2">
+                  <Cpu className="w-5 h-5 text-[#171717]" /> Live Execution Monitor
                 </h2>
-                {activeRunId && <div className="text-xs text-slate-400 font-mono mt-0.5">Run ID: {activeRunId}</div>}
+                {activeRunId && <div className="text-xs text-slate-600 font-mono font-bold mt-0.5">Run ID: {activeRunId}</div>}
               </div>
               {runStatus && (
                 <span
-                  className={`text-xs px-3.5 py-1 rounded-full font-bold uppercase ${
+                  className={`text-xs px-4 py-1.5 rounded-full font-black uppercase tracking-wider ${
                     runStatus === 'completed'
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      ? 'bg-emerald-200 text-emerald-950 border border-emerald-400'
                       : runStatus === 'paused'
-                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                      : 'bg-purple-50 text-purple-700 border border-purple-200'
+                      ? 'bg-[#d4fc30] text-[#171717] border border-slate-900'
+                      : 'bg-slate-300 text-slate-900 border border-slate-400'
                   }`}
                 >
                   Status: {runStatus}
@@ -593,30 +593,30 @@ export default function Dashboard() {
             </div>
 
             {!activeRunId ? (
-              <div className="py-20 text-center text-slate-400 text-sm font-medium">
+              <div className="py-20 text-center text-slate-500 text-sm font-extrabold">
                 Select or trigger a workflow to view step-by-step real-time execution.
               </div>
             ) : (
               <div className="space-y-4">
                 {stepRuns.map((sr) => (
-                  <div key={sr.id} className="p-5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3 shadow-xs">
+                  <div key={sr.id} className="p-5 bg-[#f4f4f5] border border-slate-300/80 rounded-2xl space-y-3 shadow-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-xl bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center">
+                        <span className="w-7 h-7 rounded-full bg-[#171717] text-[#d4fc30] text-xs font-black flex items-center justify-center">
                           {sr.workflow_step?.step_order || 1}
                         </span>
-                        <span className="font-bold text-sm uppercase tracking-wide text-slate-800">
+                        <span className="font-extrabold text-sm uppercase tracking-wide text-[#171717]">
                           {sr.workflow_step?.type}
                         </span>
                       </div>
 
                       <span
-                        className={`text-xs px-3 py-1 rounded-full font-bold ${
+                        className={`text-xs px-3.5 py-1 rounded-full font-black ${
                           sr.status === 'completed'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            ? 'bg-emerald-200 text-emerald-950 border border-emerald-300'
                             : sr.status === 'paused'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-purple-50 text-purple-700 border border-purple-200'
+                            ? 'bg-[#d4fc30] text-[#171717] border border-slate-900'
+                            : 'bg-slate-300 text-slate-800'
                         }`}
                       >
                         {sr.status}
@@ -624,21 +624,21 @@ export default function Dashboard() {
                     </div>
 
                     {sr.output && (
-                      <pre className="p-4 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 overflow-x-auto shadow-2xs">
+                      <pre className="p-4 bg-white border border-slate-300/80 rounded-2xl text-xs font-mono text-slate-900 overflow-x-auto shadow-2xs font-semibold">
                         {JSON.stringify(sr.output, null, 2)}
                       </pre>
                     )}
 
                     {/* Pause / Approval Gate UI */}
                     {sr.status === 'paused' && (
-                      <div className="p-4 bg-amber-50/80 border border-amber-200 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                        <div className="text-xs text-amber-800 font-semibold flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <div className="p-4 bg-[#d4fc30] border border-slate-900 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-md">
+                        <div className="text-xs text-[#171717] font-black flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-[#171717] shrink-0" />
                           <span>Workflow execution paused awaiting approval.</span>
                         </div>
                         <button
                           onClick={() => handleApproveStep(sr.id)}
-                          className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs transition"
+                          className="bg-[#171717] hover:bg-slate-800 text-white font-black text-xs px-5 py-2.5 rounded-full shadow-xs transition"
                         >
                           Approve & Resume Step
                         </button>
@@ -652,11 +652,11 @@ export default function Dashboard() {
         </div>
 
         {/* Cross-Org Isolation Security Tester */}
-        <div className="p-6 bg-white border border-slate-200/80 rounded-3xl space-y-4 shadow-xs">
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-500" /> Cross-Org Isolation Test (ID Guessing Security Verification)
+        <div className="p-6 bg-[#eaeaea] border border-slate-300/80 rounded-3xl space-y-4 shadow-xs">
+          <h2 className="text-sm font-black text-[#171717] flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-rose-600" /> Cross-Org Isolation Test (ID Guessing Security Verification)
           </h2>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-slate-600 font-bold">
             Enter an Org A Workflow ID while signed in as Org B user to prove strict Hasura RLS rejection (returns empty result).
           </p>
 
@@ -666,97 +666,97 @@ export default function Dashboard() {
               placeholder="Enter target Workflow ID (e.g. Org A workflow UUID)"
               value={idGuessInput}
               onChange={(e) => setIdGuessInput(e.target.value)}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white transition"
+              className="flex-1 bg-[#f4f4f5] border border-slate-300 rounded-2xl px-4 py-3 text-xs text-[#171717] focus:outline-none focus:border-slate-900 transition font-bold"
             />
             <button
               onClick={handleTestIdGuessing}
-              className="bg-slate-900 hover:bg-purple-600 text-white text-xs px-5 py-2.5 rounded-xl font-semibold shadow-xs transition"
+              className="bg-[#171717] hover:bg-[#d4fc30] hover:text-[#171717] text-white text-xs px-6 py-3 rounded-full font-black transition shadow-xs"
             >
               Execute Raw Query
             </button>
           </div>
 
           {idGuessResult && (
-            <pre className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 overflow-x-auto">
+            <pre className="p-4 bg-white border border-slate-300/80 rounded-2xl text-xs font-mono text-slate-900 overflow-x-auto font-semibold">
               {JSON.stringify(idGuessResult, null, 2)}
             </pre>
           )}
         </div>
       </main>
 
-      {/* Create Custom Workflow Modal */}
+      {/* Create Custom Workflow Modal (Hexabot Matte Gray & Electric Lime Styling) */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 max-w-lg w-full space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
-            <h2 className="text-xl font-extrabold text-slate-900">Create Custom Workflow</h2>
+        <div className="fixed inset-0 bg-[#171717]/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#eaeaea] border border-slate-300 rounded-3xl p-6 max-w-lg w-full space-y-5 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <h2 className="text-xl font-black text-[#171717]">Create Custom Workflow</h2>
             <form onSubmit={handleCreateWorkflow} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Workflow Name</label>
+                <label className="text-xs font-black text-slate-700 block mb-1">Workflow Name</label>
                 <input
                   type="text"
                   required
                   value={newWfName}
                   onChange={(e) => setNewWfName(e.target.value)}
                   placeholder="Financial Refund Escalation"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#f4f4f5] border border-slate-300 rounded-2xl px-4 py-2.5 text-sm text-[#171717] focus:outline-none font-bold"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Description</label>
+                <label className="text-xs font-black text-slate-700 block mb-1">Description</label>
                 <input
                   type="text"
                   value={newWfDesc}
                   onChange={(e) => setNewWfDesc(e.target.value)}
                   placeholder="AI refund evaluation with VP signoff"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#f4f4f5] border border-slate-300 rounded-2xl px-4 py-2.5 text-sm text-[#171717] focus:outline-none font-bold"
                 />
               </div>
 
               {/* Step 1 Configuration: LLM Prompt */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <div className="text-xs font-bold text-purple-700 flex items-center justify-between">
+              <div className="p-4 bg-[#f4f4f5] border border-slate-300/80 rounded-2xl space-y-2">
+                <div className="text-xs font-black text-[#171717] flex items-center justify-between">
                   <span>Step 1: LLM Call</span>
-                  <span className="text-[10px] text-slate-400 font-mono">type: llm_call</span>
+                  <span className="text-[10px] text-slate-500 font-mono">type: llm_call</span>
                 </div>
-                <label className="text-[11px] font-semibold text-slate-500 block">LLM Input Prompt</label>
+                <label className="text-[11px] font-bold text-slate-600 block">LLM Input Prompt</label>
                 <textarea
                   rows={2}
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 focus:outline-none font-mono"
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs text-[#171717] focus:outline-none font-mono font-semibold"
                 />
               </div>
 
               {/* Step 2 Configuration: Conditional Branch */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <div className="text-xs font-bold text-purple-700 flex items-center justify-between">
+              <div className="p-4 bg-[#f4f4f5] border border-slate-300/80 rounded-2xl space-y-2">
+                <div className="text-xs font-black text-[#171717] flex items-center justify-between">
                   <span>Step 2: Conditional Branch</span>
-                  <span className="text-[10px] text-slate-400 font-mono">type: conditional_branch</span>
+                  <span className="text-[10px] text-slate-500 font-mono">type: conditional_branch</span>
                 </div>
-                <label className="text-[11px] font-semibold text-slate-500 block">Branch Target Condition</label>
+                <label className="text-[11px] font-bold text-slate-600 block">Branch Target Condition</label>
                 <input
                   type="text"
                   value={customCondition}
                   onChange={(e) => setCustomCondition(e.target.value)}
                   placeholder="URGENT"
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none font-mono"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-[#171717] focus:outline-none font-mono font-semibold"
                 />
               </div>
 
               {/* Step 3 Configuration: Approval Gate */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <div className="text-xs font-bold text-purple-700 flex items-center justify-between">
+              <div className="p-4 bg-[#f4f4f5] border border-slate-300/80 rounded-2xl space-y-2">
+                <div className="text-xs font-black text-[#171717] flex items-center justify-between">
                   <span>Step 3: Approval Gate</span>
                   <span className="text-[10px] text-slate-400 font-mono">type: approval_gate</span>
                 </div>
-                <label className="text-[11px] font-semibold text-slate-500 block">Gate Signoff Title</label>
+                <label className="text-[11px] font-bold text-slate-600 block">Gate Signoff Title</label>
                 <input
                   type="text"
                   value={customGateName}
                   onChange={(e) => setCustomGateName(e.target.value)}
                   placeholder="Finance VP Signoff"
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-[#171717] focus:outline-none font-semibold"
                 />
               </div>
 
@@ -764,13 +764,13 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-4 py-2.5 rounded-xl font-semibold"
+                  className="bg-slate-300 hover:bg-slate-400 text-slate-900 text-xs px-5 py-2.5 rounded-full font-black"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs px-5 py-2.5 rounded-xl font-semibold shadow-xs"
+                  className="bg-[#d4fc30] hover:bg-[#c0eb00] text-[#171717] text-xs px-6 py-2.5 rounded-full font-black shadow-xs"
                 >
                   Save & Deploy Workflow
                 </button>
